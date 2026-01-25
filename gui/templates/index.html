@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音声文字起こし編集GUI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Wavesurfer.js -->
+    <script src="https://unpkg.com/wavesurfer.js@7"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.min.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js@7/dist/plugins/timeline.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- ヘッダー -->
+        <header id="header">
+            <div class="header-left">
+                <h1>音声文字起こし編集</h1>
+                <span id="file-info"></span>
+            </div>
+            <div class="header-right">
+                <button id="btn-save" class="btn btn-primary" disabled>
+                    <span class="icon">💾</span> 保存 (Ctrl+S)
+                </button>
+                <button id="btn-regenerate" class="btn btn-success" disabled>
+                    <span class="icon">🔄</span> 書き出し
+                </button>
+                <button id="btn-force-regenerate" class="btn btn-warning" disabled>
+                    <span class="icon">⚡</span> 全件書き出し
+                </button>
+                <button id="btn-help" class="btn btn-secondary">
+                    <span class="icon">?</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <div id="main-content">
+            <!-- セグメントリスト（左サイドバー） -->
+            <aside id="segment-list">
+                <div class="sidebar-header">
+                    <h2>セグメント一覧</h2>
+                    <span id="segment-count">0件</span>
+                </div>
+                <div id="segments-container">
+                    <!-- セグメントアイテムがここに動的に追加される -->
+                </div>
+            </aside>
+
+            <!-- 中央コンテンツ -->
+            <main id="editor-area">
+                <!-- エディターエリア -->
+                <div id="editor-content">
+                    <!-- ツールバー -->
+                    <div id="toolbar">
+                        <div class="toolbar-group">
+                            <button id="btn-play" class="btn btn-icon" title="再生/停止 (Space)">
+                                <span class="icon">▶</span>
+                            </button>
+                            <button id="btn-loop" class="btn btn-icon" title="ループ再生 (L)">
+                                <span class="icon">🔁</span>
+                            </button>
+                            <select id="playback-rate" class="playback-rate-select" title="再生速度">
+                                <option value="0.5">0.5x</option>
+                                <option value="1" selected>1x</option>
+                                <option value="1.5">1.5x</option>
+                                <option value="2">2x</option>
+                                <option value="3">3x</option>
+                            </select>
+                            <span id="time-display">00:00.000 / 00:00.000</span>
+                        </div>
+                        <div class="toolbar-group">
+                            <button id="btn-zoom-out" class="btn btn-icon" title="ズームアウト (-)">−</button>
+                            <input type="range" id="zoom-slider" min="10" max="500" value="100">
+                            <button id="btn-zoom-in" class="btn btn-icon" title="ズームイン (+)">+</button>
+                            <span id="zoom-level">100%</span>
+                        </div>
+                    </div>
+
+                    <!-- 波形エディタ -->
+                    <div id="waveform-editor">
+                        <div id="waveform-container"></div>
+                    </div>
+
+                    <!-- セグメント操作パネル -->
+                    <div id="segment-nav-panel">
+                        <div class="segment-nav-header">
+                            <h3>セグメント操作</h3>
+                        </div>
+                        <div class="segment-nav-buttons">
+                            <button id="btn-prev-segment" class="btn btn-secondary">
+                                <span class="icon">◀</span> 前のセグメント
+                            </button>
+                            <button id="btn-next-segment" class="btn btn-secondary">
+                                次のセグメント <span class="icon">▶</span>
+                            </button>
+                            <button id="btn-add-segment" class="btn btn-success">
+                                <span class="icon">+</span> 新規セグメント
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 編集パネル -->
+                    <div id="edit-panel">
+                        <div class="edit-panel-header">
+                            <h3>セグメント編集 <span id="edit-segment-index"></span></h3>
+                        </div>
+                        <div class="edit-panel-content">
+                            <div class="edit-row">
+                                <div class="edit-field">
+                                    <label for="edit-start">開始位置（秒）</label>
+                                    <input type="number" id="edit-start" step="0.001" min="0">
+                                </div>
+                                <div class="edit-field">
+                                    <label for="edit-end">終了位置（秒）</label>
+                                    <input type="number" id="edit-end" step="0.001" min="0">
+                                </div>
+                                <div class="edit-field">
+                                    <label>長さ</label>
+                                    <span id="edit-duration">0.000 秒</span>
+                                </div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field full-width">
+                                    <label for="edit-text">文字起こしテキスト</label>
+                                    <textarea id="edit-text" rows="3"></textarea>
+                                </div>
+                            </div>
+                            <div class="edit-actions">
+                                <button id="btn-delete-segment" class="btn btn-danger" disabled>削除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- ステータスバー -->
+        <footer id="status-bar">
+            <span id="status-message">JSONファイルを読み込んでください</span>
+            <span id="status-modified" class="hidden">● 未保存の変更があります</span>
+        </footer>
+
+        <!-- ヘルプモーダル -->
+        <div id="help-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>キーボードショートカット</h2>
+                    <button class="btn-close" onclick="closeHelpModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <table class="shortcut-table">
+                        <tr><td><kbd>Space</kbd></td><td>再生/停止</td></tr>
+                        <tr><td><kbd>L</kbd></td><td>ループ再生ON/OFF</td></tr>
+                        <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>前/次のセグメント</td></tr>
+                        <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>0.1秒移動</td></tr>
+                        <tr><td><kbd>,</kbd> <kbd>.</kbd></td><td>5秒移動</td></tr>
+                        <tr><td><kbd>+</kbd> <kbd>-</kbd></td><td>ズームイン/アウト</td></tr>
+                        <tr><td><kbd>Ctrl</kbd>+<kbd>ホイール</kbd></td><td>ズームイン/アウト</td></tr>
+                        <tr><td><kbd>Delete</kbd></td><td>セグメント削除</td></tr>
+                        <tr><td><kbd>></kbd> <kbd><</kbd></td><td>再生速度変更</td></tr>
+                        <tr><td><kbd>Ctrl+S</kbd></td><td>保存</td></tr>
+                        <tr><td><kbd>?</kbd></td><td>ヘルプ表示</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

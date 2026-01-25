@@ -102,6 +102,35 @@ def sanitize_filename(text: str, max_length: int = None) -> str:
     return sanitized
 
 
+def generate_segment_filename(
+    index: int,
+    text: str,
+    extension: str,
+    max_text_length: int = None
+) -> str:
+    """
+    Generate a filename for an audio segment.
+    
+    Args:
+        index: Segment index (1-based)
+        text: Segment text content
+        extension: File extension (with or without leading dot)
+        max_text_length: Maximum length of text part (None for no limit)
+    
+    Returns:
+        Generated filename like "001_hello_world.mp3"
+    """
+    # Ensure extension has leading dot
+    if not extension.startswith('.'):
+        extension = '.' + extension
+    
+    # Generate filename parts
+    file_number = f"{index:03d}"
+    text_part = sanitize_filename(text, max_text_length)
+    
+    return f"{file_number}_{text_part}{extension}"
+
+
 def format_timestamp(seconds: float) -> str:
     """
     Format seconds to HH:MM:SS.mmm format.

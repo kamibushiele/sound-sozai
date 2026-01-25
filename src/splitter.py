@@ -179,3 +179,95 @@ class AudioSplitter:
             print(f"  - {file_path.name}")
 
         return generated_files
+
+    def export_segment(self, segment: Dict[str, Any]) -> str:
+        """
+        Export a single segment and return its filename.
+
+        Args:
+            segment: Segment dictionary with index, start, end, text
+
+        Returns:
+            Generated filename
+        """
+        file_extension = self.audio_path.suffix
+
+        format_map = {
+            '.m4a': 'ipod',
+            '.mp4': 'mp4',
+            '.aac': 'adts',
+        }
+        export_format = format_map.get(file_extension.lower(), file_extension.lstrip('.'))
+
+        index = segment["index"]
+
+        # Calculate start and end times in milliseconds
+        start_ms = max(0, segment["start"] * 1000 - self.margin_before)
+        end_ms = min(self.audio_duration, segment["end"] * 1000 + self.margin_after)
+
+        # Extract audio segment
+        audio_segment = self.audio[start_ms:end_ms]
+
+        # Generate filename using original index
+        file_number = f"{index:03d}"
+        text_part = sanitize_filename(segment["text"], self.max_filename_length)
+        filename = f"{file_number}_{text_part}{file_extension}"
+        output_path = self.output_dir / filename
+
+        # Save audio segment
+        audio_segment.export(
+            str(output_path),
+            format=export_format,
+        )
+
+        return filename
+
+    def rename_file(self, old_filename: str, new_filename: str) -> bool:
+        """
+        Rename an audio file in the output directory.
+
+        Args:
+            old_filename: Current filename
+            new_filename: New filename
+
+        Returns:
+            True if successful, False if old file doesn't exist
+        """
+        old_path = self.output_dir / old_filename
+        new_path = self.output_dir / new_filename
+
+        if old_path.exists():
+            old_path.rename(new_path)
+            return True
+        return False
+
+    def delete_file(self, filename: str) -> bool:
+        """
+        Delete an audio file from the output directory.
+
+        Args:
+            filename: Filename to delete
+
+        Returns:
+            True if successful, False if file doesn't exist
+        """
+        file_path = self.output_dir / filename
+        if file_path.exists():
+            file_path.unlink()
+            return True
+        return False
+
+    def generate_filename(self, segment: Dict[str, Any]) -> str:
+        """
+        Generate filename for a segment without exporting.
+
+        Args:
+            segment: Segment dictionary with index, text
+
+        Returns:
+            Generated filename
+        """
+        file_extension = self.audio_path.suffix
+        file_number = f"{segment['index']:03d}"
+        text_part = sanitize_filename(segment["text"], self.max_filename_length)
+        return f"{file_number}_{text_part}{file_extension}"
