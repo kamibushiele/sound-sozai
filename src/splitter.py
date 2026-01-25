@@ -39,9 +39,8 @@ class AudioSplitter:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Load audio file
-        print(f"Loading audio file: {self.audio_path.name}")
         self.audio = AudioSegment.from_file(str(self.audio_path))
-        self.audio_duration = len(self.audio)  # in milliseconds
+        self.audio_duration = len(self.audio)  # in milliseconds  # in milliseconds
 
     def split_and_save(self, segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
@@ -65,8 +64,6 @@ class AudioSplitter:
 
         # Get the correct format name for ffmpeg
         export_format = format_map.get(file_extension.lower(), file_extension.lstrip('.'))
-
-        print(f"\nSplitting audio into {len(segments)} segments...")
 
         for i, segment in enumerate(tqdm(segments, desc="Processing segments")):
             # Calculate start and end times in milliseconds
@@ -113,8 +110,6 @@ class AudioSplitter:
         output_metadata = []
         file_extension = self.audio_path.suffix
 
-        print(f"\nGenerating metadata for {len(segments)} segments...")
-
         for i, segment in enumerate(segments):
             # Generate filename
             file_number = f"{i+1:03d}"
@@ -149,8 +144,6 @@ class AudioSplitter:
 
         with open(metadata_path, 'w', encoding='utf-8') as f:
             json.dump(output_data, f, ensure_ascii=False, indent=2)
-
-        print(f"\nMetadata saved to: {metadata_path}")
 
     def export_segment(self, segment: Dict[str, Any]) -> str:
         """

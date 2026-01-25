@@ -2,14 +2,14 @@
 setlocal enabledelayedexpansion
 
 echo ============================================================
-echo Audio Transcription and Splitting Tool - Launcher
+echo Audio Transcription Tool - Launcher
 echo ============================================================
 echo.
 
-echo “ü—Íƒtƒ@ƒCƒ‹‚ÌƒpƒX‚ð“ü—Í‚µ‚Ä‚­‚¾‚³‚¢:
+echo å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ‘ã‚¹ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„:
 set /p INPUT_FILE=">> "
 
-REM ƒpƒX‚©‚ç‘OŒã‚Ìƒ_ƒuƒ‹ƒNƒH[ƒg‚ðíœ
+REM ãƒ‘ã‚¹ã‹ã‚‰å‰å¾Œã®ãƒ€ãƒ–ãƒ«ã‚¯ã‚©ãƒ¼ãƒˆã‚’å‰Šé™¤
 if defined INPUT_FILE (
     if "!INPUT_FILE:~0,1!"=="" (
         set INPUT_FILE=!INPUT_FILE:~1!
@@ -21,21 +21,21 @@ if defined INPUT_FILE (
 
 if not exist "!INPUT_FILE!" (
     echo.
-    echo [ERROR] ƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ: !INPUT_FILE!
+    echo [ERROR] ãƒ•ã‚¡ã‚¤ãƒ«ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“: !INPUT_FILE!
     echo.
     pause
     exit /b 1
 )
 
 echo.
-echo ƒ‚ƒfƒ‹ƒTƒCƒY‚ð‘I‘ð‚µ‚Ä‚­‚¾‚³‚¢:
-echo   1. tiny   (Å‘¬EÅ’á¸“x)
-echo   2. base   (•W€)
-echo   3. small  (‚â‚â‚¸“x)
-echo   4. medium (‚¸“xE’x‚¢)
-echo   5. large  (Å‚¸“xEÅ‚à’x‚¢)
+echo ãƒ¢ãƒ‡ãƒ«ã‚µã‚¤ã‚ºã‚’é¸æŠžã—ã¦ãã ã•ã„:
+echo   1. tiny   (æœ€é€Ÿãƒ»æœ€ä½Žç²¾åº¦)
+echo   2. base   (æ¨™æº–)
+echo   3. small  (ã‚„ã‚„é«˜ç²¾åº¦)
+echo   4. medium (é«˜ç²¾åº¦ãƒ»é…ã„)
+echo   5. large  (æœ€é«˜ç²¾åº¦ãƒ»æœ€ã‚‚é…ã„)
 echo.
-set /p MODEL_CHOICE="‘I‘ð (1-5) [ƒfƒtƒHƒ‹ƒg: 2]: "
+set /p MODEL_CHOICE="é¸æŠž (1-5) [ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ: 2]: "
 
 if "%MODEL_CHOICE%"=="" set MODEL_CHOICE=2
 
@@ -47,7 +47,7 @@ if "%MODEL_CHOICE%"=="5" set MODEL=large
 
 if not defined MODEL (
     echo.
-    echo [ERROR] –³Œø‚È‘I‘ð‚Å‚·
+    echo [ERROR] ç„¡åŠ¹ãªé¸æŠžã§ã™
     echo.
     pause
     exit /b 1
@@ -55,18 +55,18 @@ if not defined MODEL (
 
 echo.
 echo ============================================================
-echo ŽÀsÝ’è:
-echo   “ü—Íƒtƒ@ƒCƒ‹: !INPUT_FILE!
-echo   ƒ‚ƒfƒ‹ƒTƒCƒY: !MODEL!
+echo å®Ÿè¡Œè¨­å®š:
+echo   å…¥åŠ›ãƒ•ã‚¡ã‚¤ãƒ«: !INPUT_FILE!
+echo   ãƒ¢ãƒ‡ãƒ«ã‚µã‚¤ã‚º: !MODEL!
 echo ============================================================
 echo.
-echo ŽÀs‚ðŠJŽn‚µ‚Ü‚·...
+echo å®Ÿè¡Œã‚’é–‹å§‹ã—ã¾ã™...
 echo.
 
-uv run python main.py "!INPUT_FILE!" --model !MODEL!
+uv run python transcribe.py "!INPUT_FILE!" --model !MODEL!
 
 echo.
 echo ============================================================
-echo ˆ—‚ªŠ®—¹‚µ‚Ü‚µ‚½
+echo å‡¦ç†ãŒå®Œäº†ã—ã¾ã—ãŸ
 echo ============================================================
 pause

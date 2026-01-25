@@ -24,15 +24,14 @@ class Transcriber:
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.device = device
+        self.model_name = model_name
 
-        # Display device info
+        # Store device info for caller to display if needed
         if device == "cuda":
-            gpu_name = torch.cuda.get_device_name(0)
-            print(f"Using GPU: {gpu_name}")
+            self.gpu_name = torch.cuda.get_device_name(0)
         else:
-            print("Using CPU (GPU not available or not selected)")
+            self.gpu_name = None
 
-        print(f"Loading Whisper model: {model_name} on {device}...")
         self.model = whisper.load_model(model_name, device=device)
         self.language = language
 
@@ -46,8 +45,6 @@ class Transcriber:
         Returns:
             Dictionary containing transcription results with segments
         """
-        print(f"Transcribing: {Path(audio_path).name}")
-
         # Transcribe with word-level timestamps
         result = self.model.transcribe(
             audio_path,
@@ -148,11 +145,5 @@ class Transcriber:
                             "text": sentence_text,
                         })
                         match_stats["fallback"] += 1
-
-        # Print matching statistics for debugging
-        total = match_stats["matched"] + match_stats["fallback"]
-        if total > 0:
-            match_rate = (match_stats["matched"] / total) * 100
-            print(f"[DEBUG] Sentence splitting: {match_stats['matched']}/{total} matched ({match_rate:.1f}%)")
 
         return segments

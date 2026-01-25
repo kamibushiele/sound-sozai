@@ -1,32 +1,39 @@
-"""Command-line interface argument parser."""
+"""Command-line interface argument parsers."""
 import argparse
 import sys
 from pathlib import Path
 
 
-def parse_args():
-    """
-    Parse command-line arguments.
-
-    Returns:
-        Parsed arguments namespace
-    """
-    # Extract input file from sys.argv before argparse processes it
-    # This handles file paths with spaces and special characters correctly
-    input_file_from_argv = None
+def _extract_positional_arg():
+    """Extract first positional argument handling quotes."""
     if len(sys.argv) > 1:
-        # First positional argument should be the input file
-        # It could be wrapped in quotes which we need to handle
         potential_input = sys.argv[1]
         if potential_input and not potential_input.startswith('--'):
-            # Remove surrounding quotes if present
-            if (potential_input.startswith('"') and potential_input.endswith('"')):
-                input_file_from_argv = potential_input[1:-1]
-            else:
-                input_file_from_argv = potential_input
+            if potential_input.startswith('"') and potential_input.endswith('"'):
+                return potential_input[1:-1]
+            return potential_input
+    return None
+
+
+def _clean_path(path: str) -> str:
+    """Remove surrounding quotes from path."""
+    path = path.strip()
+    if path.startswith('"') and path.endswith('"'):
+        path = path[1:-1]
+    return path
+
+
+def parse_transcribe_args():
+    """
+    Parse arguments for transcribe.py.
+
+    Returns:
+        Parsed arguments namespace with: input_file, model, language, output_dir, device
+    """
+    input_from_argv = _extract_positional_arg()
 
     parser = argparse.ArgumentParser(
-        description="Transcribe and split audio files into separate clips based on speech segments."
+        description="Transcribe audio file using Whisper and generate transcript.json."
     )
 
     parser.add_argument(
@@ -58,10 +65,45 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--max-filename-length",
-        type=int,
+        "--device",
+        type=str,
         default=None,
-        help="Maximum length of generated filenames (default: None, respects OS limit). Useful for shortening long filenames."
+        choices=["cuda", "cpu"],
+        help="Device to use for transcription: cuda (GPU) or cpu. Auto-detect if not specified."
+    )
+
+    args = parser.parse_args()
+
+    # Use input file extracted from sys.argv if available
+    if input_from_argv:
+        args.input_file = input_from_argv
+    else:
+        args.input_file = _clean_path(args.input_file)
+
+    # Validate input file exists
+    if not Path(args.input_file).exists():
+        parser.error(f"Input file not found: {args.input_file}")
+
+    return args
+
+
+def parse_split_args():
+    """
+    Parse arguments for split.py.
+
+    Returns:
+        Parsed arguments namespace with: output_dir, margin_before, margin_after, max_filename_length
+    """
+    input_from_argv = _extract_positional_arg()
+
+    parser = argparse.ArgumentParser(
+        description="Split audio into segments based on transcript.json."
+    )
+
+    parser.add_argument(
+        "output_dir",
+        type=str,
+        help="Output directory containing transcript.json"
     )
 
     parser.add_argument(
@@ -79,43 +121,82 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--transcribe-only",
-        action="store_true",
-        help="Only transcribe audio and generate JSON (no audio splitting)"
-    )
-
-    parser.add_argument(
-        "--from-json",
-        action="store_true",
-        help="Split audio from existing JSON file (skips transcription)"
-    )
-
-    parser.add_argument(
-        "--device",
-        type=str,
+        "--max-filename-length",
+        type=int,
         default=None,
-        choices=["cuda", "cpu"],
-        help="Device to use for transcription: cuda (GPU) or cpu. Auto-detect if not specified."
+        help="Maximum length of generated filenames (default: None, respects OS limit)"
     )
 
     args = parser.parse_args()
 
-    # Use input file extracted from sys.argv if available, otherwise use argparse result
-    if input_file_from_argv:
-        args.input_file = input_file_from_argv
+    # Use output_dir extracted from sys.argv if available
+    if input_from_argv:
+        args.output_dir = input_from_argv
     else:
-        # Clean up input file path: remove surrounding quotes if present
-        input_file = args.input_file.strip()
-        if (input_file.startswith('"') and input_file.endswith('"')):
-            input_file = input_file[1:-1]
-        args.input_file = input_file
+        args.output_dir = _clean_path(args.output_dir)
 
-    # Validate input file exists
-    if not Path(args.input_file).exists():
-        parser.error(f"Input file not found: {args.input_file}")
+    # Validate output directory exists
+    output_path = Path(args.output_dir)
+    if not output_path.exists():
+        parser.error(f"Output directory not found: {args.output_dir}")
 
-    # Validate mode conflicts
-    if args.transcribe_only and args.from_json:
-        parser.error("Cannot use --transcribe-only and --from-json together")
+    # Validate transcript.json exists
+    transcript_path = output_path / "transcript.json"
+    if not transcript_path.exists():
+        parser.error(f"transcript.json not found in: {args.output_dir}")
+
+    return args
+
+
+def parse_edit_args():
+    """
+    Parse arguments for edit.py (GUI).
+
+    Returns:
+        Parsed arguments namespace with: output_dir, port, no_browser
+    """
+    input_from_argv = _extract_positional_arg()
+
+    parser = argparse.ArgumentParser(
+        description="Edit transcript.json with GUI and export audio segments."
+    )
+
+    parser.add_argument(
+        "output_dir",
+        type=str,
+        help="Output directory containing transcript.json"
+    )
+
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=5000,
+        help="Port for the web server (default: 5000)"
+    )
+
+    parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Don't open browser automatically"
+    )
+
+    args = parser.parse_args()
+
+    # Use output_dir extracted from sys.argv if available
+    if input_from_argv:
+        args.output_dir = input_from_argv
+    else:
+        args.output_dir = _clean_path(args.output_dir)
+
+    # Validate output directory exists
+    output_path = Path(args.output_dir)
+    if not output_path.exists():
+        parser.error(f"Output directory not found: {args.output_dir}")
+
+    # Validate transcript.json exists
+    transcript_path = output_path / "transcript.json"
+    unexported_path = output_path / "transcript_unexported.json"
+    if not transcript_path.exists() and not unexported_path.exists():
+        parser.error(f"transcript.json not found in: {args.output_dir}")
 
     return args
