@@ -128,14 +128,18 @@ class AudioSplitter:
 
         return output_metadata
 
-    def save_metadata(self, metadata: List[Dict[str, Any]]) -> None:
+    def save_metadata(self, metadata: List[Dict[str, Any]], unexported: bool = False) -> None:
         """
         Save transcription metadata to JSON file.
 
         Args:
             metadata: List of segment metadata dictionaries
+            unexported: If True, save as transcript_unexported.json (for transcribe-only mode)
         """
-        metadata_path = self.output_dir / "transcript.json"
+        if unexported:
+            metadata_path = self.output_dir / "transcript_unexported.json"
+        else:
+            metadata_path = self.output_dir / "transcript.json"
 
         output_data = {
             "source_file": str(self.audio_path),

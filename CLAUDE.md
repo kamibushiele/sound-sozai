@@ -26,9 +26,16 @@ uv run python split.py input_generated/
 
 ### 出力
 
+文字起こし直後:
 ```
 input_generated/
-├── transcript.json           # セグメント情報
+└── transcript_unexported.json  # 未書き出しセグメント情報
+```
+
+書き出し後:
+```
+input_generated/
+├── transcript.json           # セグメント情報（確定）
 ├── 001_こんにちは世界.mp3     # 分割音声
 ├── 002_今日はいい天気ですね.mp3
 └── ...

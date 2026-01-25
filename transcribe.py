@@ -75,7 +75,7 @@ def main():
         )
 
         metadata = splitter.generate_metadata_only(segments)
-        splitter.save_metadata(metadata)
+        splitter.save_metadata(metadata, unexported=True)
 
         # Summary
         print("\n" + "=" * 60)
@@ -83,7 +83,7 @@ def main():
         print("=" * 60)
         print(f"Total segments: {len(metadata)}")
         print(f"Output directory: {Path(output_dir).absolute()}")
-        print(f"Metadata file: transcript.json")
+        print(f"Metadata file: transcript_unexported.json")
         print("\nNext step:")
         print(f"  uv run python edit.py {output_dir}")
 
