@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-音声文字起こし編集GUI 起動スクリプト
+手動調整GUI 起動スクリプト
 
 使用方法:
     python run_gui.py <output_directory>
@@ -34,7 +34,7 @@ def find_transcript_json(directory: Path) -> Path | None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description='音声文字起こし編集GUI',
+        description='手動調整GUI',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='ディレクトリを変更する場合はサーバーを再起動してください。'
     )
@@ -84,7 +84,7 @@ def main():
     url = f'http://localhost:{args.port}'
 
     print("=" * 50)
-    print("音声文字起こし編集GUI")
+    print("手動調整GUI")
     print("=" * 50)
     print(f"\nディレクトリ: {dir_path}")
     print(f"JSONファイル: {json_path.name}")

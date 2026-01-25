@@ -1,5 +1,5 @@
 """
-音声文字起こし編集GUI - Flaskアプリケーション
+手動調整GUI - Flaskアプリケーション
 """
 
 import json
@@ -388,6 +388,6 @@ def regenerate_audio():
 
 
 if __name__ == '__main__':
-    print("音声文字起こし編集GUI を起動します...")
+    print("手動調整GUI を起動します...")
     print("ブラウザで http://localhost:5000 を開いてください")
     app.run(debug=True, port=5000)

@@ -185,6 +185,8 @@ async function loadInitialData() {
             setStatus(`${currentData.segments.length}件のセグメントを読み込みました`);
         }
 
+        updateTitle();
+
     } catch (error) {
         console.error('Load error:', error);
         setStatus('読み込みエラー: ' + error.message);
@@ -262,7 +264,9 @@ async function regenerateAudio(forceExport = false) {
 
         // 変更なしフラグをリセット
         isModified = false;
+        currentData.has_unexported = false;
         updateModifiedStatus();
+        updateTitle();
 
         alert(`${result.message}\n出力先: ${result.output_dir}`);
         setStatus('書き出し完了');
@@ -838,11 +842,22 @@ function updateFileInfo() {
 function markModified() {
     isModified = true;
     updateModifiedStatus();
+    updateTitle();
 }
 
 function updateModifiedStatus() {
     const indicator = document.getElementById('status-modified');
     indicator.classList.toggle('hidden', !isModified);
+}
+
+function updateTitle() {
+    const hasUnexported = currentData?.has_unexported || false;
+    const needsExport = hasUnexported || isModified;
+    const icon = needsExport ? '⚠' : '✓';
+    const title = `${icon} 手動調整GUI`;
+
+    document.title = title;
+    document.querySelector('#header h1').textContent = title;
 }
 
 function setStatus(message) {
