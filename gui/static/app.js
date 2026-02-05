@@ -570,6 +570,11 @@ function createRegions() {
             region.element.style.height = `${layerHeight}%`;
             region.element.style.top = `${top}%`;
 
+            // 非選択時のスタイル（角丸とボーダー）
+            region.element.style.borderRadius = '6px';
+            region.element.style.border = '1px solid rgba(255, 255, 255, 0.4)';
+            region.element.style.boxSizing = 'border-box';
+
             // ハンドルのスタイルを設定（inline styleを上書き）
             const leftHandle = region.element.querySelector('[part~="region-handle-left"]');
             const rightHandle = region.element.querySelector('[part~="region-handle-right"]');
@@ -627,6 +632,13 @@ function updateRegionColor(index) {
         const leftHandle = region.element.querySelector('[part~="region-handle-left"]');
         const rightHandle = region.element.querySelector('[part~="region-handle-right"]');
         const isSelected = selectedSegmentIndex === index;
+
+        // 選択状態に応じてボーダーを変更
+        if (isSelected) {
+            region.element.style.border = 'none';
+        } else {
+            region.element.style.border = '1px solid rgba(255, 255, 255, 0.4)';
+        }
 
         if (leftHandle) {
             leftHandle.style.display = isSelected ? 'block' : 'none';
