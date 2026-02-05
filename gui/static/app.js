@@ -15,6 +15,11 @@ let isLoopEnabled = false;
 let isRecreatingRegions = false;  // リージョン再作成時のイベント制御用
 let nextInternalId = 1;  // 内部ID生成用カウンター
 
+// undo/redo用スタック
+let undoStack = [];
+let redoStack = [];
+const MAX_UNDO_HISTORY = 50;
+
 // ===========================================
 // セッション管理
 // ===========================================
@@ -46,6 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function initEventListeners() {
 
     // ツールバー
+    document.getElementById('btn-undo').addEventListener('click', undo);
+    document.getElementById('btn-redo').addEventListener('click', redo);
     document.getElementById('btn-play').addEventListener('click', togglePlayPause);
     document.getElementById('btn-loop').addEventListener('click', toggleLoop);
     document.getElementById('btn-zoom-in').addEventListener('click', () => adjustZoom(50));
@@ -95,14 +102,41 @@ function initEventListeners() {
 
 function initKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
-        // テキスト入力中は無視
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            // Ctrl+Sは常に有効
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                saveJson();
-            }
+        const isTextInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+
+        // Ctrl+S: 常に有効（保存）
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            saveJson();
             return;
+        }
+
+        // Ctrl+Enter: テキスト入力中に確定して抜ける
+        if (e.ctrlKey && e.key === 'Enter' && isTextInput) {
+            e.preventDefault();
+            applyEditChanges();
+            e.target.blur();
+            return;
+        }
+
+        // テキスト入力中はそれ以外のショートカットを無視
+        // （Ctrl+Z/Yはブラウザのテキスト編集undo/redoを使用）
+        if (isTextInput) {
+            return;
+        }
+
+        // Ctrl+Z/Y: テキスト入力中以外でセグメントundo/redo
+        if (e.ctrlKey) {
+            if (e.key === 'z') {
+                e.preventDefault();
+                undo();
+                return;
+            }
+            if (e.key === 'y') {
+                e.preventDefault();
+                redo();
+                return;
+            }
         }
 
         switch (e.key) {
@@ -204,6 +238,9 @@ async function loadInitialData() {
         }
 
         currentData = data;
+
+        // undo履歴をクリア
+        clearUndoHistory();
 
         // 内部IDを付与
         assignInternalIds(currentData.segments);
@@ -600,6 +637,11 @@ function createRegions() {
                 rightHandle.style.opacity = '0.9';
                 rightHandle.style.display = 'none';  // 選択時のみ表示
             }
+
+            // ドラッグ開始時にundo用の状態を保存
+            region.element.addEventListener('mousedown', () => {
+                saveStateForUndo();
+            });
         }
     });
 }
@@ -805,6 +847,9 @@ function applyEditChanges() {
 
     if (!hasChanges) return;
 
+    // undo用に状態を保存
+    saveStateForUndo();
+
     // 変更を適用
     segment.start = newStart;
     segment.end = newEnd;
@@ -830,6 +875,9 @@ function deleteSelectedSegment() {
     if (!confirm('このセグメントを削除しますか？')) {
         return;
     }
+
+    // undo用に状態を保存
+    saveStateForUndo();
 
     // リージョンを削除
     const region = regions.getRegions().find(r => r.id === `region-${selectedSegmentIndex}`);
@@ -857,6 +905,9 @@ function deleteSelectedSegment() {
 
 function addNewSegment() {
     if (!currentData) return;
+
+    // undo用に状態を保存
+    saveStateForUndo();
 
     const duration = wavesurfer ? wavesurfer.getDuration() : 10;
     const currentTime = wavesurfer ? wavesurfer.getCurrentTime() : 0;
@@ -1050,6 +1101,108 @@ function markModified() {
     isModified = true;
     updateModifiedStatus();
     updateTitle();
+}
+
+// ===========================================
+// Undo/Redo機能
+// ===========================================
+
+function saveStateForUndo() {
+    if (!currentData || !currentData.segments) return;
+
+    // 現在の状態をディープコピーして保存
+    const state = {
+        segments: JSON.parse(JSON.stringify(currentData.segments)),
+        selectedSegmentIndex: selectedSegmentIndex
+    };
+
+    undoStack.push(state);
+
+    // 履歴の上限を超えたら古いものを削除
+    if (undoStack.length > MAX_UNDO_HISTORY) {
+        undoStack.shift();
+    }
+
+    // 新しい操作をしたらredoスタックをクリア
+    redoStack = [];
+
+    updateUndoRedoButtons();
+}
+
+function undo() {
+    if (undoStack.length === 0 || !currentData) return;
+
+    // 現在の状態をredoスタックに保存
+    const currentState = {
+        segments: JSON.parse(JSON.stringify(currentData.segments)),
+        selectedSegmentIndex: selectedSegmentIndex
+    };
+    redoStack.push(currentState);
+
+    // 前の状態を復元
+    const prevState = undoStack.pop();
+    currentData.segments = prevState.segments;
+    selectedSegmentIndex = prevState.selectedSegmentIndex;
+
+    // UIを更新
+    refreshAfterUndoRedo();
+    setStatus('元に戻しました');
+}
+
+function redo() {
+    if (redoStack.length === 0 || !currentData) return;
+
+    // 現在の状態をundoスタックに保存
+    const currentState = {
+        segments: JSON.parse(JSON.stringify(currentData.segments)),
+        selectedSegmentIndex: selectedSegmentIndex
+    };
+    undoStack.push(currentState);
+
+    // 次の状態を復元
+    const nextState = redoStack.pop();
+    currentData.segments = nextState.segments;
+    selectedSegmentIndex = nextState.selectedSegmentIndex;
+
+    // UIを更新
+    refreshAfterUndoRedo();
+    setStatus('やり直しました');
+}
+
+function refreshAfterUndoRedo() {
+    // リージョンを再作成
+    isRecreatingRegions = true;
+    createRegions();
+    if (selectedSegmentIndex !== null) {
+        updateRegionColor(selectedSegmentIndex);
+    }
+    isRecreatingRegions = false;
+
+    // リストを更新
+    renderSegmentList();
+    updateEditPanel();
+
+    // 変更フラグを更新
+    markModified();
+    updateUndoRedoButtons();
+}
+
+function updateUndoRedoButtons() {
+    const undoBtn = document.getElementById('btn-undo');
+    const redoBtn = document.getElementById('btn-redo');
+
+    if (undoBtn) {
+        undoBtn.disabled = undoStack.length === 0;
+    }
+    if (redoBtn) {
+        redoBtn.disabled = redoStack.length === 0;
+    }
+}
+
+function clearUndoHistory() {
+    undoStack = [];
+    redoStack = [];
+    updateUndoRedoButtons();
 }
 
 function updateModifiedStatus() {
