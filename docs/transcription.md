@@ -15,6 +15,13 @@ uv run transcribe.py <音声ファイル> [オプション]
 | `--language` | 言語コード (ja, en等) | 自動検出 |
 | `--output-dir` | 出力ディレクトリ | `{入力名}_generated/` |
 | `--device` | デバイス (cuda/cpu) | 自動検出 |
+| `--index-digits` | インデックスの桁数 | セグメント数から自動計算 |
+| `--index-sub-digits` | サブインデックスの桁数 | 3 |
+| `--filename-template` | ファイル名テンプレート | `{index}_{basename}` |
+| `--margin-before` | 開始前マージン（秒） | 0.1 |
+| `--margin-after` | 終了後マージン（秒） | 0.2 |
+
+これらの書き出し設定は`transcript.json`の`output_format`に保存される。詳細は [data_format.md](data_format.md) を参照。
 
 ## Whisperモデル
 

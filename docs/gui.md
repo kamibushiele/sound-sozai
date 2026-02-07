@@ -6,11 +6,11 @@
 
 ```bash
 # transcript.jsonがあるディレクトリを指定
-uv run run_gui.py input_generated/
+uv run edit.py input_generated/
 
 # オプション
-uv run run_gui.py input_generated/ --port 8080      # ポート変更
-uv run run_gui.py input_generated/ --no-browser     # ブラウザを開かない
+uv run edit.py input_generated/ --port 8080      # ポート変更
+uv run edit.py input_generated/ --no-browser     # ブラウザを開かない
 ```
 
 ブラウザで http://localhost:5000 が自動で開きます。

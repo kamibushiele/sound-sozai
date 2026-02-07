@@ -127,7 +127,7 @@ def main():
         print(f"  - transcript.json (settings only)")
         print(f"  - edit_segments.json (all segments)")
         print("\nNext step:")
-        print(f"  uv run python edit.py {output_dir}")
+        print(f"  uv run edit.py {output_dir}")
 
         return 0
 

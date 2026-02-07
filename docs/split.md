@@ -12,9 +12,10 @@ uv run split.py <ディレクトリ> [オプション]
 
 | オプション | 説明 | デフォルト |
 |-----------|------|-----------|
-| `--margin-before` | 開始前マージン（秒） | 0.1 |
-| `--margin-after` | 終了後マージン（秒） | 0.2 |
 | `--max-filename-length` | ファイル名最大長 | 制限なし |
+| `--force` | 全セグメントを強制書き出し | off |
+
+マージン設定は `transcript.json` の `output_format.margin` で指定する。詳細は [data_format.md](data_format.md) を参照。
 
 ## 書き出し挙動
 
