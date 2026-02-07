@@ -1,6 +1,6 @@
 # 分割CLI
 
-セグメント情報（`transcript_unexported.json`）を音声ファイルに書き出す。
+セグメント情報を音声ファイルに書き出す。
 
 ## 使い方
 
@@ -8,13 +8,12 @@
 uv run split.py <ディレクトリ> [オプション]
 ```
 
-- `<ディレクトリ>`: `transcript_unexported.json` を含むディレクトリ（書き出し先でもある）
+- `<ディレクトリ>`: `transcript.json` と `edit_segments.json` を含むディレクトリ（書き出し先でもある）
 
 | オプション | 説明 | デフォルト |
 |-----------|------|-----------|
-| `--margin-before` | 開始前マージン（秒） | 0.1 |
-| `--margin-after` | 終了後マージン（秒） | 0.2 |
 | `--max-filename-length` | ファイル名最大長 | 制限なし |
+| `--force` | 全セグメントを強制書き出し | off |
 
 ## 書き出し挙動
 

@@ -6,11 +6,11 @@
 
 ```bash
 # transcript.jsonがあるディレクトリを指定
-uv run run_gui.py input_generated/
+uv run edit.py input_generated/
 
 # オプション
-uv run run_gui.py input_generated/ --port 8080      # ポート変更
-uv run run_gui.py input_generated/ --no-browser     # ブラウザを開かない
+uv run edit.py input_generated/ --port 8080      # ポート変更
+uv run edit.py input_generated/ --no-browser     # ブラウザを開かない
 ```
 
 ブラウザで http://localhost:5000 が自動で開きます。
@@ -57,7 +57,7 @@ uv run run_gui.py input_generated/ --no-browser     # ブラウザを開かな�
 
 ## 保存と書き出し
 
-- **保存**: 編集内容を`transcript_unexported.json`に保存
+- **保存**: 編集内容を`edit_segments.json`に保存
 - **書き出し**: 差分ベースで音声ファイルを生成
 - **全件書き出し**: 全セグメントを強制的に再書き出し
 
