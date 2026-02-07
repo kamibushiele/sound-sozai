@@ -37,4 +37,4 @@ input_generated/
 ```
 
 この時点では音声ファイルは生成されない。
-書き出しは [split.py](split.md) または [GUI](GUI.md) で行う。
+書き出しは [split.py](split.md) または [GUI](gui.md) で行う。
