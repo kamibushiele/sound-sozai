@@ -43,9 +43,16 @@ jobs:
           cp /tmp/ffmpeg-extract/ffmpeg-master-latest-win64-lgpl/LICENSE.txt tools/ffmpeg/
           rm -rf /tmp/ffmpeg-extract ffmpeg.zip
 
+      - name: Set version
+        run: |
+          if [ "$ACT" = "true" ]; then
+            echo "VERSION=v0.0.0-local" >> $GITHUB_ENV
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          fi
+
       - name: Create release package
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
           PACKAGE_NAME="VoiceSlicer-${VERSION}-win64"
 
           # Create package directory
@@ -66,7 +73,14 @@ jobs:
 
           echo "PACKAGE_NAME=${PACKAGE_NAME}" >> $GITHUB_ENV
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }}
+          path: ${{ env.PACKAGE_NAME }}.zip
+
       - name: Create GitHub Release
+        if: env.ACT != 'true'
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.PACKAGE_NAME }}.zip
