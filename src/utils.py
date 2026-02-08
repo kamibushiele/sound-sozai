@@ -5,6 +5,36 @@ from pathlib import Path
 from typing import List, Dict, Any, Tuple, Optional
 
 
+# Project root directory
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def setup_ffmpeg() -> None:
+    """Configure pydub to use local ffmpeg if available in tools/ffmpeg/."""
+    import sys
+    from pydub import AudioSegment
+
+    ffmpeg_dir = PROJECT_ROOT / "tools" / "ffmpeg"
+    ext = ".exe" if sys.platform == "win32" else ""
+    ffmpeg_path = ffmpeg_dir / f"ffmpeg{ext}"
+    ffprobe_path = ffmpeg_dir / f"ffprobe{ext}"
+
+    if ffmpeg_path.exists():
+        AudioSegment.converter = str(ffmpeg_path)
+    if ffprobe_path.exists():
+        AudioSegment.ffprobe = str(ffprobe_path)
+
+
+def get_audio_segment_class():
+    """pydubのAudioSegmentをローカルffmpeg設定済みで返す。
+
+    pydubを使う箇所はこの関数経由でAudioSegmentを取得すること。
+    """
+    setup_ffmpeg()
+    from pydub import AudioSegment
+    return AudioSegment
+
+
 def split_sentences_with_positions(text: str) -> List[tuple]:
     """
     Split Japanese text by punctuation marks and return with character positions.

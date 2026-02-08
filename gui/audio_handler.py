@@ -5,7 +5,7 @@
 
 import numpy as np
 from pathlib import Path
-from pydub import AudioSegment
+from src.utils import get_audio_segment_class
 
 
 class AudioHandler:
@@ -21,9 +21,10 @@ class AudioHandler:
         self._samples = None
     
     @property
-    def audio(self) -> AudioSegment:
+    def audio(self):
         """AudioSegmentのキャッシュ"""
         if self._audio is None:
+            AudioSegment = get_audio_segment_class()
             self._audio = AudioSegment.from_file(str(self.audio_path))
         return self._audio
     
