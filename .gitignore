@@ -25,3 +25,6 @@ output/
 
 .claude/
 **/.mcp.json
+
+# Bundled tools (ffmpeg etc.)
+tools/

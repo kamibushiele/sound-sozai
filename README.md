@@ -10,14 +10,13 @@
 - 波形を見ながら手動調整できるGUI
 - 差分ベースの書き出し（変更箇所のみ再処理）
 
-## 動作要件
-
-- Python 3.10-3.12（3.13+は非対応）
-- [uv](https://docs.astral.sh/uv/)（パッケージ管理）
-- [ffmpeg](https://ffmpeg.org/)（音声処理）
-- GPU: オプション（CUDA対応で高速化）
-
 ## セットアップ
+
+### リリースパッケージ（推奨）
+
+[Releases](https://github.com/kamibushiele/sound-sozai/releases)からzipをダウンロードして展開してください。
+
+### ソースから構築
 
 ```bash
 # リポジトリをクローン
@@ -27,6 +26,8 @@ cd sound-sozai
 # 依存パッケージをインストール
 uv sync
 ```
+
+uv・ffmpegは別途インストールが必要です。詳細は[docs/tools.md](docs/tools.md)を参照してください。
 
 ## 使い方
 
@@ -70,6 +71,7 @@ GUIの書き出しボタンからも実行できます。
 | [docs/export_behavior.md](docs/export_behavior.md) | 書き出し処理の仕様 |
 | [docs/data_format.md](docs/data_format.md) | JSONデータフォーマット仕様 |
 | [docs/index_specification.md](docs/index_specification.md) | セグメントindex仕様 |
+| [docs/tools.md](docs/tools.md) | 外部ツール |
 
 ## ライセンス
 

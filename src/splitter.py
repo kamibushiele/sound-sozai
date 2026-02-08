@@ -1,11 +1,11 @@
 """Audio file splitting based on transcription segments."""
 from pathlib import Path
 from typing import List, Dict, Any
-from pydub import AudioSegment
 from tqdm import tqdm
 import json
 
 from .utils import (
+    get_audio_segment_class,
     format_index_filename,
     determine_index,
     calculate_index_digits,
@@ -43,6 +43,7 @@ class AudioSplitter:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Load audio file
+        AudioSegment = get_audio_segment_class()
         self.audio = AudioSegment.from_file(str(self.audio_path))
         self.audio_duration = len(self.audio)  # in milliseconds  # in milliseconds
 
