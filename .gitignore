@@ -28,3 +28,6 @@ output/
 
 # Bundled tools (ffmpeg etc.)
 tools/
+
+# act local output
+act-output/

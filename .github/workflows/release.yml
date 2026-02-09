@@ -48,7 +48,12 @@ jobs:
           if [ "$ACT" = "true" ]; then
             echo "VERSION=v0.0.0-local" >> $GITHUB_ENV
           else
-            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+            VERSION="${GITHUB_REF#refs/tags/}"
+            if [ -z "$VERSION" ] || [ "$VERSION" = "$GITHUB_REF" ]; then
+              echo "::error::Tag version not found in GITHUB_REF: $GITHUB_REF"
+              exit 1
+            fi
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
           fi
 
       - name: Create release package
@@ -72,6 +77,13 @@ jobs:
           zip -r "${PACKAGE_NAME}.zip" "${PACKAGE_NAME}/"
 
           echo "PACKAGE_NAME=${PACKAGE_NAME}" >> $GITHUB_ENV
+
+      - name: Copy to act-output/ (act local)
+        if: env.ACT == 'true'
+        run: |
+          mkdir -p act-output
+          cp "${PACKAGE_NAME}.zip" act-output/
+          echo "Output: act-output/${PACKAGE_NAME}.zip"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
