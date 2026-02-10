@@ -48,6 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadInitialData();
 });
 
+// 未保存の変更がある場合、ページ遷移時に警告
+window.addEventListener('beforeunload', (e) => {
+    if (isModified) {
+        e.preventDefault();
+    }
+});
+
 function initEventListeners() {
 
     // ツールバー
