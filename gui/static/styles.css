@@ -23,7 +23,6 @@
     --border-color: #3c3c3c;
     --segment-normal: #3498db;
     --segment-selected: #e67e22;
-    --segment-edited: #27ae60;
     --header-height: 50px;
     --sidebar-width: 300px;
     --statusbar-height: 24px;
@@ -218,10 +217,6 @@ body {
 .segment-item.selected {
     background-color: rgba(230, 126, 34, 0.2);
     border-left: 3px solid var(--segment-selected);
-}
-
-.segment-item.edited {
-    border-left: 3px solid var(--segment-edited);
 }
 
 .segment-item-header {

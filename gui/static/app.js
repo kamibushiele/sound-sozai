@@ -220,7 +220,6 @@ function cleanSegmentsForSave(segments) {
     return segments.map(seg => {
         const cleaned = { ...seg };
         delete cleaned._id;
-        delete cleaned.edited;
         delete cleaned.index_formatted;  // 表示専用フィールドを除外
         return cleaned;
     });
@@ -497,7 +496,6 @@ function initWavesurfer() {
 
             segment.start = newStart;
             segment.end = newEnd;
-            segment.edited = true;
 
             markModified();
             renderSegmentList();
@@ -586,9 +584,7 @@ function createRegions() {
 
     // セグメントごとにリージョンを作成
     currentData.segments.forEach((segment, index) => {
-        const color = segment.edited ?
-            'rgba(39, 174, 96, 0.3)' :
-            'rgba(52, 152, 219, 0.3)';
+        const color = 'rgba(52, 152, 219, 0.3)';
 
         // 常に start <= end を保証（ハンドル位置の逆転を防止）
         const displayStart = Math.min(segment.start, segment.end);
@@ -667,9 +663,6 @@ function updateRegionColor(index) {
     if (selectedSegmentIndex === index) {
         color = 'rgba(230, 126, 34, 0.4)';
         zIndex = '100';  // 選択中は最前面に
-    } else if (segment.edited) {
-        color = 'rgba(39, 174, 96, 0.3)';
-        zIndex = '1';
     } else {
         color = 'rgba(52, 152, 219, 0.3)';
         zIndex = '1';
@@ -728,9 +721,6 @@ function renderSegmentList() {
         item.className = 'segment-item';
         if (selectedSegmentIndex === index) {
             item.classList.add('selected');
-        }
-        if (segment.edited) {
-            item.classList.add('edited');
         }
 
         // 表示番号はセグメントID、書き出し済みの場合はindexも表示
@@ -864,7 +854,6 @@ function applyEditChanges() {
     segment.start = newStart;
     segment.end = newEnd;
     segment.text = newText;
-    segment.edited = true;
 
     markModified();
     renderSegmentList();
