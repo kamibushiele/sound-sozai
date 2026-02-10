@@ -72,6 +72,11 @@ function initEventListeners() {
             wavesurfer.setPlaybackRate(parseFloat(e.target.value));
         }
     });
+    document.getElementById('volume-slider').addEventListener('input', (e) => {
+        if (wavesurfer) {
+            wavesurfer.setVolume(parseInt(e.target.value) / 100);
+        }
+    });
 
     // 編集パネル
     document.getElementById('btn-delete-segment').addEventListener('click', deleteSelectedSegment);

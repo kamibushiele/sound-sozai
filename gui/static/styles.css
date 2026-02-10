@@ -305,6 +305,17 @@ input[type="range"] {
     border-color: var(--primary-color);
 }
 
+.volume-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+}
+
+#volume-slider {
+    width: 80px;
+}
+
 /* エディターコンテンツ */
 #editor-content {
     flex: 1;
