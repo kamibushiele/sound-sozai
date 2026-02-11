@@ -12,15 +12,16 @@
 
 ## セットアップ
 
-### リリースパッケージ（推奨）
+### 方法その1: リリースパッケージ（推奨）
 
 対応プラットフォーム
 
 - Windows x64
 
 [Releases](https://github.com/kamibushiele/voice-slicer/releases)からzipをダウンロードして展開してください。
+以上で完了です。
 
-### ソースから構築
+### 方法その2: ソースから構築
 
 上記対応プラットフォーム以外で動かす場合
 
@@ -30,7 +31,7 @@ cd voice-slicer
 uv sync
 ```
 
-uv・ffmpegは別途インストールが必要です。詳細は[docs/tools.md](docs/tools.md)を参照してください。
+この場合uv・ffmpegは別途インストールが必要です。詳細は[docs/tools.md](docs/tools.md)を参照してください。
 
 ## 使い方
 
