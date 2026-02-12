@@ -68,7 +68,7 @@ jobs:
           cp transcribe.py split.py edit.py export_edit.py voice_slicer.py "${PACKAGE_NAME}/"
           cp voice_slicer.bat "${PACKAGE_NAME}/"
           cp pyproject.toml uv.lock .python-version "${PACKAGE_NAME}/"
-          cp README.md LICENSE "${PACKAGE_NAME}/"
+          cp README.md LICENSE THIRD_PARTY_LICENSES.md "${PACKAGE_NAME}/"
 
           # Copy bundled tools
           cp -r tools/ "${PACKAGE_NAME}/"
