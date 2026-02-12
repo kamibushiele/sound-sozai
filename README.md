@@ -66,3 +66,5 @@ uv sync
 ## ライセンス
 
 MIT License
+
+リリースパッケージに含まれるサードパーティ製ソフトウェアについては [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) を参照してください。
